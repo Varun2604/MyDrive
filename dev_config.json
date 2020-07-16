@@ -1,0 +1,11 @@
+{
+  "app_name": " helo world",
+  "jwt_expiry_seconds" : 31536000,
+  "mongo" : {
+    "db_name" : "strong-box",
+    "user" : "mongo-admin",
+    "password" : "Mnbv@1234",
+    "host" : "cluster0.ocafy.mongodb.net",
+    "port": ""
+  }
+}
