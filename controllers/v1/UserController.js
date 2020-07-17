@@ -4,8 +4,8 @@ const {ErrorHandler, Utils} = require("../../helpers");
 const config = require("../../config");
 const {User} = require("../../repositories");
 
-const jwtKey = "my_secret_key";
-const jwtExpirySeconds = config.jwt_expiry_seconds;
+const jwtKey = config.jwt.secret_token;
+const jwtExpirySeconds = config.jwt.expiry_seconds;
 
 class UserController {
     static create(req, res) {
@@ -49,7 +49,6 @@ class UserController {
                     algorithm: "HS256",
                     expiresIn: jwtExpirySeconds,
                 });
-                console.log("token:", token);
 
                 // set the cookie as the token string, with a similar max age as the token
                 // here, the max age is in milliseconds, so we multiply by 1000
@@ -57,7 +56,7 @@ class UserController {
                 //set in the response, for API usage.
                 return res.status(200).json({
                     "message" : "token generated successfully",
-                    "bearer_token" : token
+                    "token" : token
                 });
             }catch(e){
                 if(e.message.indexOf("Invalid") === 0){

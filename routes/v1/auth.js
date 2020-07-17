@@ -2,8 +2,7 @@ const jwt = require("jsonwebtoken");
 const config = require("../../config");
 const {ErrorHandler, MongoHandler} = require("../../helpers");
 const {User} = require("../../repositories");
-const jwtKey = "my_secret_key";
-const jwtExpirySeconds = 365*24*60*60;      //1 year
+const jwtKey = config.jwt.secret_token;
 
 module.exports = function(req, res, next) {
     //TODO skip whitelisted urls like /users or Get /assets
@@ -34,7 +33,7 @@ module.exports = function(req, res, next) {
             req.user = user;
             next();
         }, (e)=>{
-            if(e.message.indexOf("Invalid") === 0){
+            if(e.message.indexOf("Invalid") === 0){             //TODO handle expiry error as well.
                 return ErrorHandler.BadRequest(res, e.message)
             }
         });
@@ -47,5 +46,4 @@ module.exports = function(req, res, next) {
         console.error("Error while validating user ", e);
         return ErrorHandler.InternalServerError(res);
     }
-
 };

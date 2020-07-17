@@ -8,10 +8,10 @@ const v1_api_router = Router();
 v1_api_router.use(auth);
 
 //registering user routes
-v1_api_router.post('/users', UserController.create);
+// v1_api_router.post('/users', UserController.create);
 v1_api_router.get('/users/:id', UserController.get);
 v1_api_router.put('/users/:id', UserController.update);
-v1_api_router.delete('/users/:id', UserController.delete);
+v1_api_router.delete('/users/:id', UserController.delete);          // CAN THE USER DELETE HIMSELF ???
 
 //registering file routes
 v1_api_router.post('/files', FileController.create);

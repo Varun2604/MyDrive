@@ -1,4 +1,5 @@
 module.exports = {
     User : require("./User"),
-    File : require("./File")
+    File : require("./File"),
+    Asset : require("./Asset")
 };

@@ -1,11 +1,20 @@
 {
-  "app_name": " helo world",
-  "jwt_expiry_seconds" : 31536000,
+  "app_name": "strong-box",
+  "jwt" : {
+    "expiry_seconds" : 31536000,
+    "secret_token" : "my_secret_key"
+  },
   "mongo" : {
     "db_name" : "strong-box",
     "user" : "mongo-admin",
     "password" : "Mnbv@1234",
     "host" : "cluster0.ocafy.mongodb.net",
     "port": ""
+  },
+  "storage" : {
+    "location" : {
+      "temp_assets" : "./files/tmp/",
+      "approved_assets" : "./files/approved/"
+    }
   }
 }

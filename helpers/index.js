@@ -1,5 +1,6 @@
 module.exports = {
     ErrorHandler : require("./error_handler"),
-    MongoHandler : require("./mongo"),
-    Utils : require("./util")
+    DbHandler : require("./mongo_db"),
+    Utils : require("./util"),
+    StorageHandler : require("./file_storage"),
 };

@@ -1,11 +1,10 @@
 const { genSaltSync: genSalt, hashSync : hashPassword} = require('bcrypt');
-const {MongoHandler} = require("../helpers");
-class UserRepo{
+const {DbHandler} = require("../helpers");
 
+class UserRepo{
     constructor(){
         this.collection_name = "users"
     }
-
     Create(name, user_name, password, type){
         let self = this;
         return new Promise((resolve, reject)=>{
@@ -17,7 +16,7 @@ class UserRepo{
                 user_name : user_name,
                 type : type
             };
-            MongoHandler.Insert(this.collection_name, user).then((result)=>{
+            DbHandler.Insert(self.collection_name, user).then((result)=>{
                 resolve(result);
             }, (err)=>{
                 console.error("Error while creating user", err);
@@ -30,8 +29,9 @@ class UserRepo{
         });
     }
     ValidateUser(user_name, password){
+        let self = this;
         return new Promise((resolve, reject)=>{
-            this.Get(null, user_name).then((user)=>{
+            self.Get(null, user_name).then((user)=>{
                 if(user !== null && user.hasOwnProperty("password")){
                     if(hashPassword(password, user.salt) === user.password){
                         resolve(user);
@@ -54,6 +54,7 @@ class UserRepo{
 
     }
     Get(id=null, user_name=null){
+        let self = this;
         return new Promise((resolve, reject)=>{
             if(id === null && user_name === null){
                 reject(new Error("invalid input"));
@@ -66,7 +67,7 @@ class UserRepo{
             if(user_name !== null){
                 search_val.user_name = user_name;
             }
-            return MongoHandler.Find(this.collection_name, search_val).then((user)=>{
+            return DbHandler.Find(self.collection_name, search_val).then((user)=>{
                 resolve(user[0]);
             }, (err)=>{
                 console.error("Error while getting user", err);

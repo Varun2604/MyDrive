@@ -13,4 +13,4 @@ module.exports = class Utils{
         }
         return mandatory_keys;
     }
-}
+};
