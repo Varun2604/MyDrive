@@ -7,7 +7,7 @@ class FileRepo{
         this.collection_name = "files";
     }
 
-    Create(name=null, is_public=false, asset=null){
+    Create(name=null, is_public=false, asset=null, user=null){
         let self = this;
         return new Promise(async (resolve, reject)=>{
             let file = {
@@ -43,6 +43,7 @@ class FileRepo{
                 file.encoding = asset.encoding;
                 file.mime_type = asset.mime_type;
                 file.created = Date.now();
+                file.created_by = user;           //TODO check if the file is uploaded by the same user too.
 
                 //insert file details into db.
                 let result = await DbHandler.Insert(self.collection_name, file);

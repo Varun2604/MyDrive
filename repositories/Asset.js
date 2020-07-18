@@ -5,7 +5,7 @@ class AssetRepo{
         this.collection_name = "assets";
     }
 
-    Create(actual_name=null, system_file_name=null, encoding=null, mime_type=null, size=null){
+    Create(actual_name=null, system_file_name=null, encoding=null, mime_type=null, size=null, user=null){
         let self = this;
         return new Promise(async (resolve, reject)=>{
 
@@ -22,6 +22,7 @@ class AssetRepo{
                 return reject(new Error(`Mandatory fields [ ${non_keys} ] not present`));
             }
             try{
+                asset.created_by = user
                 let result = await DbHandler.Insert(self.collection_name, asset);
                 resolve(result);
             }catch(e){

@@ -23,7 +23,7 @@ class AssetController {
                         // save file to system
                         let size = await StorageHandler.saveTmpAs(file_stream, system_file_name);
                         // create an asset entry to db.
-                        let result = await Asset.Create(filename, system_file_name, 'utf8', mime_type, size);
+                        let result = await Asset.Create(filename, system_file_name, 'utf8', mime_type, size, req.user);
                         //return success
                         return res.status(200).json({
                             message: "asset stored temporarily, link to a file before 7 days",

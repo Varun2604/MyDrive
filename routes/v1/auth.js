@@ -30,6 +30,8 @@ module.exports = function(req, res, next) {
             if(user === null) {
                 return ErrorHandler.Unauthorised(res);
             }
+            delete user.password;           //TODO is using the delete keyword an optimal way to delete keys from an object (search) ??
+            delete user.salt;
             req.user = user;
             next();
         }, (e)=>{

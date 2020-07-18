@@ -6,7 +6,7 @@ class FileController {
     static create(req, res) {
         (async()=>{
             try{
-                let result = await File.Create(req.body.name, req.body.is_public, req.body.asset);
+                let result = await File.Create(req.body.name, req.body.is_public, req.body.asset. req.user);
                 let f = result.ops[0];
                 delete f.system_file_name;
                 return res.status(200).json({
