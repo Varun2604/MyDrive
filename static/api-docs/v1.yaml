@@ -1,0 +1,260 @@
+swagger: '2.0'
+info:
+  title: strong-box API documentation
+  description: The swagger doc contains the api documentation for all available service now apis
+  version: 1.0.0
+#basePath: /gsnow/api/sn
+#security:
+#  - APIKeyHeader: []
+securityDefinitions:
+   APIKeyHeader:
+     type: apiKey
+     in: header
+     description: Mandatory field. Token for authenticating the consumer of this API.
+#     required: true
+     name: Authorization
+   BasicAuth:
+     type: basic
+     scheme: basic
+     description: Your user id and token, usually used to generate API token
+     in: header
+#     required: true
+produces:
+  - application/json
+paths:
+  /v1/signup:
+    post:
+      summary: Creates a new user with the given credentials
+      security :
+        - APIKeyHeader: []
+      tags:
+        - non-api-urls
+      parameters:
+        - name: body
+          in: body
+          description: Request payload to create a new user
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                required: true
+                description: The full name of the user
+              user_name:
+                type: string
+                description: The unique user_name, this will be used to login/generate API token along with a password
+                required: true
+              password:
+                type: string
+                description: The unique password, this will be used to login/generate API token along with a user_name
+                required: true
+      responses:
+        '200':
+          description: User has been successfully registered, the user object is returned along.
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message : User created successfully.
+              details:
+                _id : df5df24gfgv35
+                name : <user's name>
+                user_name : <user's user_name>
+                type: <user's type, defaulted to basic>
+        '400':
+          description: Invalid inputs provided, usually a non-unique user_name
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message : field user_name already exists
+        '500':
+          description: Internal Server Error
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message : Internal Server error
+  /v1/generate_token:
+    post:
+      summary: Creates a new user token with the given credentials
+      tags:
+        - non-api-urls
+      security:
+        - BasicAuth: []
+      responses:
+        '200':
+          description: User token has been successfully created, the token object is returned along.
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: Token created successfully.
+              details:
+                token: < user's token >
+        '401':
+          description: Authentication error
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: Invalid user_name or password
+        '500':
+          description: Internal Server Error
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: Internal Server error
+  /api/v1/assets:
+    post:
+      summary: Creates a temporary asset object, that should be attached to file while creating one. All temporary assets have a exipry of 7 days. Max file size is 2mb, only one file can be uploaded in one shot.
+      tags:
+        - api-urls
+      security:
+        - APIKeyHeader: []
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: file
+          description: The file to be uploaded.
+          required: true
+          type: file
+      responses:
+        '200':
+          description: Temporary asset has been added successfylly.
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: asset stored temporarily, link to a file before 7 days
+              details:
+                id: < the asset id >
+        '401':
+          description: Authentication error
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: Invalid user_name or password
+        '400':
+          description: Bad Request error because of invalid inputs/file-size/file-type
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: max-file size exceeded
+        '500':
+          description: Internal Server Error
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: Internal Server error
+  /api/v1/files:
+    post:
+      summary: Creates a file object with the given name, folder, and asset_id
+      tags:
+        - api-urls
+      security:
+        - APIKeyHeader: []
+      parameters:
+        - name: body
+          in: body
+          description: Request payload to create a new file
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                required: false
+                description: The final name of file
+              is_public:
+                type: boolean
+                description: If set to true, then the file will be available publically to read, without any authorisation. Can be set to false only in paid version.
+                required: true
+              asset:
+                type: object
+                description: Asset details to be linked with the file
+                required: true
+                properties:
+                  id:
+                    type: string
+                    description: the asset id
+                    required: true
+      responses:
+        '200':
+          description: File saved successfully, temporary asset made permanent
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: successfully created file
+              details:
+                _id: < the file id >
+                name: <file name>
+                is_public: < value >
+                size: 605888
+                encoding: utf8
+                mime_type: image/jpeg
+                created: 1595040283862
+        '401':
+          description: Authentication error
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: Invalid user_name or password
+        '400':
+          description: Bad Request error because of invalid inputs/file-size/file-type
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: max-file size exceeded
+        '500':
+          description: Internal Server Error
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: Internal Server error
+  /api/v1/files/{id}/assets:
+    get:
+      summary: Fetches the actual file with the given file id
+      tags:
+        - api-urls
+      security:
+        - APIKeyHeader: []
+      parameters:
+        - name: id
+          in: path
+          description: The id of the file that has to be fetched
+          required: true
+      responses:
+        '200':
+          description: returns the actual file/or stream of files.
+        '401':
+          description: Authentication error
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: Invalid user_name or password
+        '400':
+          description: Bad Request error because of invalid file id
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: max-file size exceeded
+        '500':
+          description: Internal Server Error
+          schema:
+            type: object
+            description: The object contains a user-friendly message and a details object
+            example:
+              message: Internal Server error

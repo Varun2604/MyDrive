@@ -1,0 +1,22 @@
+{
+  "app_name": "strong-box",
+  "jwt" : {
+    "expiry_seconds" : 31536000,
+    "secret_token" : "my_secret_key"
+  },
+  "mongo" : {
+    "db_name" : "strong-box",
+    "user" : "mongo-admin",
+    "password" : "Mnbv@1234",
+    "host" : "cluster0.ocafy.mongodb.net",
+    "port": ""
+  },
+  "storage" : {
+    "location" : {
+      "base_dir" : "files",
+      "temp_dir" : "tmp",
+      "approved_dir" : "approved"
+    },
+    "max_approved_size" : 2097152
+  }
+}
