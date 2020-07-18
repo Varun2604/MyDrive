@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const config = require("../../config");
-const {ErrorHandler, MongoHandler} = require("../../helpers");
+const {ErrorHandler} = require("../../helpers");
 const {User} = require("../../repositories");
 const jwtKey = config.jwt.secret_token;
 

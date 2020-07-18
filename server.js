@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require("cookie-parser");
 
 const routes = require('./routes/index');
-const helpers = require("./helpers");
+const {DbHandler, StorageHandler} = require("./helpers");
 // Instantiate express
 const app = express();
 // Set our port
@@ -19,7 +19,8 @@ app.use('/', routes(app));
 
 // resolve all initialisation promises and start server
 Promise.all([
-    helpers.MongoHandler.Init(),       //initialise db connection pool.
+    DbHandler.Init(),       //  initialise db connection pool.
+    StorageHandler.Init()   //  initialise remove file storage connection.
 ]).then(()=>{
     // Start our server
     app.listen(port, () => {

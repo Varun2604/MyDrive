@@ -40,7 +40,6 @@ class AssetRepo{
                 return reject(new Error("invalid id"));
             }
             return DbHandler.DeleteById(self.collection_name, id).then((d)=>{
-                console.log(d);
                 resolve(true);
             }, (err)=>{
                 console.error("Error while deleting asset by id, ", err);

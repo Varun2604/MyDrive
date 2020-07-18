@@ -37,6 +37,7 @@ class FileRepo{
                 if(StorageHandler.getExtension(file.name) === ''){
                     file.name = file.name+"."+StorageHandler.fetchExtensionFor(asset.mime_type);
                 }
+                delete file.asset;
                 file.system_file_name = asset.system_file_name;
                 file.size = asset.size;
                 file.encoding = asset.encoding;
@@ -62,7 +63,20 @@ class FileRepo{
 
     }
     Get(id){
-
+        let self = this;
+        return new Promise(async (resolve, reject)=>{
+            if(id == null){
+                return reject(new Error("invalid id"));
+            }
+            try{
+                let files = await DbHandler.Find(self.collection_name, {'_id' : DbHandler.ObjectIDOf(id)});
+                //throw error if length > 1 ???
+                resolve(files[0]);
+            }catch(err){
+                console.error("Error while getting file, ", err);
+                reject(err)
+            }
+        });
     }
 }
 

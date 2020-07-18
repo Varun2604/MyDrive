@@ -1,8 +1,10 @@
 const Busboy = require('busboy');
 const { v4: uuidv4 } = require('uuid');
 
-const {ErrorHandler, FileHandler} = require("../../helpers");
-const {Asset} = require('../../repositories');
+const {ErrorHandler, StorageHandler} = require("../../helpers");
+const {File, Asset} = require('../../repositories');
+
+const PATH_FILE_ID_REGEX = /(([0-9a-z]+)(?=\/assets))(?!(\/files\/))/g;         //assuming mongo db ids are only created with numbers and small chars
 
 class AssetController {
     static create(req, res) {
@@ -11,16 +13,16 @@ class AssetController {
             let busboy = new Busboy({ headers: req.headers });
             let system_file_name = uuidv4();
             let created_asset = false;
-            busboy.on('file', async function(field_name, file, filename, encoding, mime_type) {
+            busboy.on('file', async function(field_name, file_stream, filename, transfer_encoding, mime_type) {
                 if(!created_asset){
                     created_asset = true;
                     let splits = filename.split('.');
                     system_file_name = system_file_name + "." +splits[splits.length -1];
                     try{
                         // save file to system
-                        await FileHandler.saveTmpAs(file, system_file_name);
+                        await StorageHandler.saveTmpAs(file_stream, system_file_name);
                         // create an asset entry to db.
-                        let result = await Asset.Create(filename, system_file_name, encoding, mime_type, 0);            //deletmine size
+                        let result = await Asset.Create(filename, system_file_name, 'utf8', mime_type, 0);            //deletmine size
                         //return success
                         return res.status(200).json({
                             message: "asset stored temporarily, link to a file before 7 days",
@@ -28,11 +30,11 @@ class AssetController {
                         });
                     }catch (e){
                         if(e.message.indexOf('Unsupported content type') !== -1){
-                            await FileHandler.deleteTmp(system_file_name, false);
+                            await StorageHandler.deleteTmp(system_file_name, false);
                             return ErrorHandler.InvalidValueBadRequest(res, ['file']);
                         }else{
-                            console.log("error while writing temp file to system, ", e);
-                            await FileHandler.deleteTmp(system_file_name, false);
+                            console.error("error while writing temp file to system, ", e);
+                            await StorageHandler.deleteTmp(system_file_name, false);
                             return ErrorHandler.InternalServerError(res);
                         }
                     }
@@ -43,15 +45,40 @@ class AssetController {
             });
             req.pipe(busboy)
         }catch(e){
-            console.log("error while writing temp file to system (while initialising busboy), ", e);
+            console.error("error while writing temp file to system (while initialising busboy), ", e);
             ErrorHandler.InternalServerError(res);
         }
     }
 
     static get(req, res){
-        return res.status(200).json({
-            message: "get asset",
-        });
+        let self = this;
+        (async()=>{
+            try{
+                let file_id = req.path.match(PATH_FILE_ID_REGEX)[0];
+                let file = await File.Get(file_id);
+                if(file.is_public){
+                    //if file is public, serve it as it is
+                    let file_buf = await StorageHandler.fetchApproved(file.system_file_name);
+                    res.set('Content-Type', file.mime_type);
+                    res.set('Content-Disposition', 'attachment; filename='+file.name);
+                    res.status(200).send(file_buf);
+                }else{
+                    //if file is not public, authenticate the user before serving the file.
+                    return res.status(200).json({
+                        message: "Feature currently not available",
+                    });
+                }
+            }catch(e){
+                if( ( e.message.indexOf('Invalid' ) === 0) || ( e.message.indexOf('Mandatory' ) === 0 ) ){
+                    return ErrorHandler.BadRequest(res, e.message);
+                }else if(e.code === 'ENOTFOUND'){
+                    return ErrorHandler.BadRequest(res, 'Invalid file ID');
+                }else{
+                    console.error("Error while fetching asset", e);
+                    return ErrorHandler.InternalServerError(res);
+                }
+            }
+        })();
     }
 
     static delete(req, res){

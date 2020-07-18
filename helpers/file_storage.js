@@ -8,9 +8,14 @@ class FileHandler{
     constructor(){
         //
     }
-    saveTmpAs(file, system_file_name){
+    Init(){         // start connection to remove file storage server
+        return new Promise((resolve, reject)=>{
+            resolve();
+        })
+    }
+    saveTmpAs(file_stream, system_file_name){
         let save_to = this.__getAbsTempFileDirPath(system_file_name);
-        return this.__saveFile(file, save_to)
+        return this.__saveFile(file_stream, save_to)
     }
     copyFromTmpToApproved(tmp_name, approved_name){
         let self = this;
@@ -54,9 +59,19 @@ class FileHandler{
             }
         })
     }
-    __saveFile(file, path){
+    fetchApproved(approved_file, encoding='utf-8',flag='r'){
+        let self = this;
         return new Promise((resolve, reject)=>{
-            file.pipe(fs.createWriteStream(path)).on("error", e =>{
+            try{
+                resolve(fs.readFileSync(self.__getAbsApprovedFileDirPath(approved_file), {flag}));
+            }catch(e){
+                reject(e);
+            }
+        });
+    }
+    __saveFile(file_stream, path){
+        return new Promise((resolve, reject)=>{
+            file_stream.pipe(fs.createWriteStream(path)).on("error", e =>{
                 return reject(e);
             }).on('close',()=>{
                 resolve(true);

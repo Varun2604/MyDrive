@@ -10,19 +10,23 @@ v1_api_router.use(auth);
 //registering user routes
 // v1_api_router.post('/users', UserController.create);
 v1_api_router.get('/users/:id', UserController.get);
-v1_api_router.put('/users/:id', UserController.update);
-v1_api_router.delete('/users/:id', UserController.delete);          // CAN THE USER DELETE HIMSELF ???
+// TODO
+// v1_api_router.put('/users/:id', UserController.update);
+// v1_api_router.delete('/users/:id', UserController.delete);          // CAN THE USER DELETE HIMSELF ???
 
 //registering file routes
 v1_api_router.post('/files', FileController.create);
 v1_api_router.get('/files/:id', FileController.get);
-v1_api_router.get('/files', FileController.getAll);
-v1_api_router.put('/files/:id', FileController.update);
-v1_api_router.delete('/files/:id', FileController.delete);
+v1_api_router.get('/files/:id/assets', AssetController.get);
+//TODO
+// v1_api_router.get('/files', FileController.getAll);
+// v1_api_router.put('/files/:id', FileController.update);
+// v1_api_router.delete('/files/:id', FileController.delete);
 
 //registering asset routes
 v1_api_router.post('/assets', AssetController.create);
-v1_api_router.get('/assets/:id', AssetController.get);
+//TODO
+// v1_api_router.get('/assets/:id', AssetController.get);
 
 module.exports = (app)=>{
     v1_api_router.locals = app.locals;

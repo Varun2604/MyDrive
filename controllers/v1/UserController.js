@@ -22,7 +22,7 @@ class UserController {
                     message: "successfully created user",
                 });
             }catch(e){
-                console.log("Error while creating user", e);
+                console.error("Error while creating user", e);
                 return ErrorHandler.InternalServerError(res);
             }
         })();
