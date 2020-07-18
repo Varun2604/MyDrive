@@ -15,6 +15,7 @@
     "location" : {
       "temp_assets" : "./files/tmp/",
       "approved_assets" : "./files/approved/"
-    }
+    },
+    "max_approved_size" : 2097152
   }
 }

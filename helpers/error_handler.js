@@ -1,7 +1,7 @@
 module.exports = class ErrorHandler {
-    static Unauthorised(res) {
+    static Unauthorised(res, msg) {
         return res.status(401).json({
-            "message" : "Unauthorised"
+            "message" : msg||"Unauthorised"
         });
     }
 

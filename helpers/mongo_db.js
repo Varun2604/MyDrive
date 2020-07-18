@@ -29,7 +29,16 @@ class MongoHandler{
         })
     }
     Insert(collection, document){
-        return this.db.collection(collection).insertOne(document);
+        let self = this;
+        return new Promise( (resolve, reject) => {
+            self.db.collection(collection).insertOne(document).then(result => {
+                resolve(result);
+            }, err => {
+                reject(self.GenerateGenericError(err))
+            }).catch(err => {
+                reject(err);
+            });
+        });
     }
     Find(collection = null, search_by = null){
         return this.db.collection(collection).find(search_by).toArray();
@@ -45,6 +54,12 @@ class MongoHandler{
     }
     ObjectIDOf(id){
         return new ObjectID(id);
+    }
+    GenerateGenericError(e){
+        if(e.code === 11000){
+            return new Error('duplicate keys present'+JSON.stringify(e.keyPattern))
+        }
+        return e;
     }
 };
 

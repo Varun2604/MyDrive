@@ -17,6 +17,9 @@ app.use(cookieParser());
 // Register our routes in app
 app.use('/', routes(app));
 
+// Register static files
+app.use(express.static('./static'));
+
 // resolve all initialisation promises and start server
 Promise.all([
     DbHandler.Init(),       //  initialise db connection pool.

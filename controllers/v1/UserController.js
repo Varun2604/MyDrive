@@ -18,12 +18,20 @@ class UserController {
             try{
                 let result = await User.Create(user.name, user.user_name, user.password, user.type || "basic");
                 console.log(result); //remove
+                let u = result.ops[0];
+                delete u.password;
+                delete u.salt;
                 return res.status(200).json({
                     message: "successfully created user",
+                    details : u
                 });
             }catch(e){
-                console.error("Error while creating user", e);
-                return ErrorHandler.InternalServerError(res);
+                if(e.message.indexOf("duplicate key") !== -1){
+                    return ErrorHandler.BadRequest(res, "user_name already present");
+                }else{
+                    console.error("Error while creating user", e);
+                    return ErrorHandler.InternalServerError(res);
+                }
             }
         })();
     }
@@ -44,6 +52,7 @@ class UserController {
 
         (async () =>{
             try{
+                await User.ValidateUser(user_name, password);
                 // Create a new token with the username in the payload
                 const token = jwt.sign({ user_name, password }, jwtKey, {
                     algorithm: "HS256",
@@ -55,12 +64,12 @@ class UserController {
                 res.cookie("token", token, { maxAge: jwtExpirySeconds * 1000 });
                 //set in the response, for API usage.
                 return res.status(200).json({
-                    "message" : "token generated successfully",
-                    "token" : token
+                    message : "token generated successfully",
+                    details : {token}
                 });
             }catch(e){
                 if(e.message.indexOf("Invalid") === 0){
-                    return ErrorHandler.BadRequest(res, e.message);
+                    return ErrorHandler.Unauthorised(res, e.message);
                 }
                 console.error("Error while generating token for user : ", e);
                 return ErrorHandler.InternalServerError(res);

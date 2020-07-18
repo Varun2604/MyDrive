@@ -20,8 +20,7 @@ class UserRepo{
                 resolve(result);
             }, (err)=>{
                 console.error("Error while creating user", err);
-                //TODO check error and return case specific error, for eg - unique idx check error
-                reject(new Error("Unable to create user"));
+                reject(err);
             }).catch((err)=>{
                 console.error("Error while creating user", err);
                 reject(new Error("Unable to create user"));
@@ -32,7 +31,7 @@ class UserRepo{
         let self = this;
         return new Promise((resolve, reject)=>{
             self.Get(null, user_name).then((user)=>{
-                if(user !== null && user.hasOwnProperty("password")){
+                if(user != null && user.hasOwnProperty("password") && user.hasOwnProperty('salt')){
                     if(hashPassword(password, user.salt) === user.password){
                         resolve(user);
                         return;

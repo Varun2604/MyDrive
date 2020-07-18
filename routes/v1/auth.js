@@ -8,12 +8,12 @@ module.exports = function(req, res, next) {
     //TODO skip whitelisted urls like /users or Get /assets
 
     // Session token can be obtained from the cookies, sess tokens are set for the requests from UI client
-    var token = req.cookies.token;
+    var token = null;
 
     // if the cookie is not set, check for `Authorisation` Header,
     // since  the requests coming from API clients will have Authorisation Headers set
     if (!token) {
-        token = req.header('Authorisation');
+        token = req.header('Authorization');
     }
 
     // if the token is not set, return an unauthorized error

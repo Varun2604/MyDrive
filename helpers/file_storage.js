@@ -1,8 +1,8 @@
 const mime = require('mime-types');
 const fs = require('fs');
-const path = require('path'),
-      os = require('os');
+const path = require('path'), os = require('os');
 const { COPYFILE_EXCL } = fs.constants;
+const config = require('../config');
 
 class FileHandler{
     constructor(){
@@ -13,9 +13,8 @@ class FileHandler{
             resolve();
         })
     }
-    saveTmpAs(file_stream, system_file_name){
-        let save_to = this.__getAbsTempFileDirPath(system_file_name);
-        return this.__saveFile(file_stream, save_to)
+    saveTmpAs(reader, system_file_name){
+        return this.__saveFile(reader, this.__getAbsTempFileDirPath(system_file_name))
     }
     copyFromTmpToApproved(tmp_name, approved_name){
         let self = this;
@@ -69,12 +68,31 @@ class FileHandler{
             }
         });
     }
-    __saveFile(file_stream, path){
+    __saveFile(reader, path){
         return new Promise((resolve, reject)=>{
-            file_stream.pipe(fs.createWriteStream(path)).on("error", e =>{
+            //TODO check if a cap can be put on read stream even when it is piped to write stream, manual streaming of read stream can be avoided.
+            reader.on('error', e =>{
                 return reject(e);
-            }).on('close',()=>{
-                resolve(true);
+            });
+            let size = 0;
+            let data = [];
+            reader.on('data', d => {
+                size += d.length;
+                if(size > config.storage.max_approved_size){            //max size of file that will be read is 2mb
+                    let e = new Error('File size more than allowed.');
+                    e.code = 'ERR_FS_FILE_TOO_LARGE';
+                    file_stream.destroy(e);
+                }
+                data.push(d);
+            });
+            reader.on('end', () => {
+                try{
+                    let buf = Buffer.concat(data);
+                    fs.writeFileSync(path, buf);
+                    return resolve(size)
+                }catch (e){
+                    return reject(e);
+                }
             });
         });
     }
@@ -106,9 +124,6 @@ class FileHandler{
             return '';
         }
         return ext;
-    }
-    getSize(file){
-        return fs.sta
     }
 };
 

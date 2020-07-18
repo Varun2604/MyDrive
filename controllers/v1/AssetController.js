@@ -10,7 +10,8 @@ class AssetController {
     static create(req, res) {
         const self = this;
         try{
-            let busboy = new Busboy({ headers: req.headers });
+            //TODO check out the max_file_count/max_file_size cap feature of busboy, currently both cases are handled manually
+            let busboy = new Busboy({ headers: req.headers/*, limits : { fileSize : 1024, files : 1}*/ });
             let system_file_name = uuidv4();
             let created_asset = false;
             busboy.on('file', async function(field_name, file_stream, filename, transfer_encoding, mime_type) {
@@ -20,21 +21,24 @@ class AssetController {
                     system_file_name = system_file_name + "." +splits[splits.length -1];
                     try{
                         // save file to system
-                        await StorageHandler.saveTmpAs(file_stream, system_file_name);
+                        let size = await StorageHandler.saveTmpAs(file_stream, system_file_name);
                         // create an asset entry to db.
-                        let result = await Asset.Create(filename, system_file_name, 'utf8', mime_type, 0);            //deletmine size
+                        let result = await Asset.Create(filename, system_file_name, 'utf8', mime_type, size);
                         //return success
                         return res.status(200).json({
                             message: "asset stored temporarily, link to a file before 7 days",
-                            asset_id : result.insertedId
+                            details : {
+                                id : result.insertedId
+                            }
                         });
                     }catch (e){
+                        await StorageHandler.deleteTmp(system_file_name, false);
                         if(e.message.indexOf('Unsupported content type') !== -1){
-                            await StorageHandler.deleteTmp(system_file_name, false);
                             return ErrorHandler.InvalidValueBadRequest(res, ['file']);
+                        }else if(e.code === 'ERR_FS_FILE_TOO_LARGE'){
+                            return ErrorHandler.BadRequest(res, e.message);
                         }else{
                             console.error("error while writing temp file to system, ", e);
-                            await StorageHandler.deleteTmp(system_file_name, false);
                             return ErrorHandler.InternalServerError(res);
                         }
                     }
@@ -42,6 +46,10 @@ class AssetController {
             });
             busboy.on('finish', function() {
                 res.setHeader('Connection', 'close');               // keep the connection open while streaming ??
+            });
+            busboy.on('error', function(e){
+                console.error("busboy error, ", e);
+                ErrorHandler.InternalServerError(res);
             });
             req.pipe(busboy)
         }catch(e){
