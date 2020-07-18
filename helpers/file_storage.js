@@ -10,7 +10,23 @@ class FileHandler{
     }
     Init(){         // start connection to remove file storage server
         return new Promise((resolve, reject)=>{
-            resolve();
+            try{
+                if(!fs.existsSync(path.join(os.homedir(), config.storage.location.base_dir))){
+                    console.log('no base');
+                    fs.mkdirSync(path.join(os.homedir(), config.storage.location.base_dir));
+                }
+                if(!fs.existsSync(path.join(os.homedir(), config.storage.location.base_dir, config.storage.location.temp_dir))){
+                    console.log('no temp');
+                    fs.mkdirSync(path.join(os.homedir(), config.storage.location.base_dir, config.storage.location.temp_dir));
+                }
+                if(!fs.existsSync(path.join(os.homedir(), config.storage.location.base_dir, config.storage.location.approved_dir))){
+                    console.log('no approved');
+                    fs.mkdirSync(path.join(os.homedir(), config.storage.location.base_dir, config.storage.location.approved_dir));
+                }
+                resolve();
+            }catch(e){
+                reject(e);
+            }
         })
     }
     saveTmpAs(reader, system_file_name){
@@ -107,10 +123,10 @@ class FileHandler{
         });
     }
     __getAbsTempFileDirPath(system_file_name){
-        return path.join(os.homedir(), "files", "tmp", path.basename(system_file_name));            //TODO push the base path to config
+        return path.join(os.homedir(), config.storage.location.base_dir, config.storage.location.temp_dir, path.basename(system_file_name));            //TODO push the base path to config
     }
     __getAbsApprovedFileDirPath(system_file_name){
-        return path.join(os.homedir(), "files", "approved", path.basename(system_file_name));            //TODO push the base path to config
+        return path.join(os.homedir(),  config.storage.location.base_dir, config.storage.location.approved_dir, path.basename(system_file_name));            //TODO push the base path to config
     }
     getExtension(file_name){
         return path.extname(file_name);
@@ -125,6 +141,7 @@ class FileHandler{
         }
         return ext;
     }
+
 };
 
 module.exports = new FileHandler();

@@ -13,8 +13,9 @@
   },
   "storage" : {
     "location" : {
-      "temp_assets" : "./files/tmp/",
-      "approved_assets" : "./files/approved/"
+      "base_dir" : "files",
+      "temp_dir" : "tmp",
+      "approved_dir" : "approved"
     },
     "max_approved_size" : 2097152
   }
