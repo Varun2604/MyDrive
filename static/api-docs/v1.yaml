@@ -109,7 +109,7 @@ paths:
               message: Internal Server error
   /api/v1/assets:
     post:
-      summary: Creates a temporary asset object, that should be attached to file while creating one. All temporary assets have a exipry of 7 days.
+      summary: Creates a temporary asset object, that should be attached to file while creating one. All temporary assets have a exipry of 7 days. Max file size is 2mb, only one file can be uploaded in one shot.
       tags:
         - api-urls
       security:
