@@ -2,12 +2,12 @@ const Busboy = require('busboy');
 const { v4: uuidv4 } = require('uuid');
 
 const {ErrorHandler, StorageHandler} = require("../../helpers");
-const {File, Asset} = require('../../repositories');
+const {File, Asset} = require('../../services');
 
 const PATH_FILE_ID_REGEX = /(([0-9a-z]+)(?=\/assets))(?!(\/files\/))/g;         //assuming mongo db ids are only created with numbers and small chars
 
 class AssetController {
-    static create(req, res) {
+    create(req, res) {
         const self = this;
         try{
             //TODO check out the max_file_count/max_file_size cap feature of busboy, currently both cases are handled manually
@@ -58,7 +58,7 @@ class AssetController {
         }
     }
 
-    static get(req, res){
+    get(req, res){
         let self = this;
         (async()=>{
             try{
@@ -89,11 +89,11 @@ class AssetController {
         })();
     }
 
-    static delete(req, res){
+    delete(req, res){
         return res.status(200).json({
             message: "delete asset",
         });
     }
 }
 
-module.exports = AssetController;
+module.exports = new AssetController();

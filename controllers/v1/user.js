@@ -2,13 +2,13 @@ const jwt = require("jsonwebtoken");
 
 const {ErrorHandler, Utils} = require("../../helpers");
 const config = require("../../config");
-const {User} = require("../../repositories");
+const {User} = require("../../services");
 
 const jwtKey = config.jwt.secret_token;
 const jwtExpirySeconds = config.jwt.expiry_seconds;
 
 class UserController {
-    static create(req, res) {
+    create(req, res) {
         let user = req.body;
         let non_keys = Utils.CheckMandatoryFields(user, ["name", "user_name", "password"]);
         if(non_keys.length !== 0){
@@ -36,7 +36,7 @@ class UserController {
         })();
     }
 
-    static generateToken(req, res) {
+    generateToken(req, res) {
         // get basic auth creds from header.
         if (!req.headers.authorization || req.headers.authorization.indexOf('Basic ') === -1) {
             return ErrorHandler.Unauthorised(res);
@@ -78,23 +78,23 @@ class UserController {
         })();
     }
 
-    static update(req, res){
+    update(req, res){
         return res.status(200).json({
             message: "update user",
         });
     }
 
-    static delete(req, res){
+    delete(req, res){
         return res.status(200).json({
             message: "delete user",
         });
     }
 
-    static get(req, res){
+    get(req, res){
         return res.status(200).json({
             message: "get users",
         });
     }
 }
 
-module.exports = UserController;
+module.exports = new UserController();

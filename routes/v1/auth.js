@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../../config");
 const {ErrorHandler} = require("../../helpers");
-const {User} = require("../../repositories");
+const {User} = require("../../services");
 const jwtKey = config.jwt.secret_token;
 
 module.exports = function(req, res, next) {

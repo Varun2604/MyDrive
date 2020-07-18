@@ -1,5 +1,5 @@
 const {DbHandler} = require("../helpers");
-const AssetService = require('./Asset');
+const AssetService = require('./asset');
 const {StorageHandler, Utils} = require("../helpers");
 
 class FileRepo{

@@ -1,5 +1,5 @@
 module.exports = {
-    UserController : require("./UserController"),
-    FileController : require("./FileController"),
-    AssetController : require("./AssetController"),
+    UserController : require("./user"),
+    FileController : require("./file"),
+    AssetController : require("./asset"),
 };
