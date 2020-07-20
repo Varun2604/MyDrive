@@ -1,11 +1,8 @@
-const jwt = require("jsonwebtoken");
-
-const {ErrorHandler, Utils} = require("../../helpers");
+const {ErrorHandler, Utils, JWTAuth} = require("../../helpers");
 const config = require("../../config");
 const {User} = require("../../services");
 
-const jwtKey = config.jwt.secret_token;
-const jwtExpirySeconds = config.jwt.expiry_seconds;
+const cookie_expiry_seconds = config.jwt.expiry_seconds;
 
 class UserController {
     create(req, res) {
@@ -53,15 +50,11 @@ class UserController {
         (async () =>{
             try{
                 await User.ValidateUser(user_name, password);
-                // Create a new token with the username in the payload
-                const token = jwt.sign({ user_name, password }, jwtKey, {
-                    algorithm: "HS256",
-                    expiresIn: jwtExpirySeconds,
-                });
+                let token = await JWTAuth.Generate(user_name, password);
 
                 // set the cookie as the token string, with a similar max age as the token
                 // here, the max age is in milliseconds, so we multiply by 1000
-                res.cookie("token", token, { maxAge: jwtExpirySeconds * 1000 });
+                res.cookie("token", token, { maxAge: cookie_expiry_seconds * 1000 });
                 //set in the response, for API usage.
                 return res.status(200).json({
                     message : "token generated successfully",

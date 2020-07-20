@@ -30,12 +30,12 @@ class FileRepo{
                     return reject(new Error(`Invalid asset in input`));
                 }
                 //move the move the asset to approved folder
-                await StorageHandler.copyFromTmpToApproved(asset.system_file_name, asset.system_file_name);
+                await StorageHandler.MoveFromTmpToApproved(asset.system_file_name, asset.system_file_name);
                 if(file.name == null){
                     file.name = asset.actual_name;
                 }
-                if(StorageHandler.getExtension(file.name) === ''){
-                    file.name = file.name+"."+StorageHandler.fetchExtensionFor(asset.mime_type);
+                if(StorageHandler.GetExtension(file.name) === ''){
+                    file.name = file.name+"."+StorageHandler.FetchExtensionFor(asset.mime_type);
                 }
                 delete file.asset;
                 file.system_file_name = asset.system_file_name;

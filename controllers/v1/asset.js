@@ -1,8 +1,8 @@
 const Busboy = require('busboy');
 const { v4: uuidv4 } = require('uuid');
 
-const {ErrorHandler, StorageHandler} = require("../../helpers");
-const {File, Asset} = require('../../services');
+const {ErrorHandler, StorageHandler, JWTAuth} = require("../../helpers");
+const {File, Asset, User} = require('../../services');
 
 const PATH_FILE_ID_REGEX = /(([0-9a-z]+)(?=\/assets))(?!(\/files\/))/g;         //assuming mongo db ids are only created with numbers and small chars
 
@@ -21,7 +21,7 @@ class AssetController {
                     system_file_name = system_file_name + "." +splits[splits.length -1];
                     try{
                         // save file to system
-                        let size = await StorageHandler.saveTmpAs(file_stream, system_file_name);
+                        let size = await StorageHandler.SaveTmpAs(file_stream, system_file_name);
                         // create an asset entry to db.
                         let result = await Asset.Create(filename, system_file_name, 'utf8', mime_type, size, req.user);
                         //return success
@@ -32,7 +32,7 @@ class AssetController {
                             }
                         });
                     }catch (e){
-                        await StorageHandler.deleteTmp(system_file_name, false);
+                        await StorageHandler.DeleteTmp(system_file_name, false);
                         if(e.message.indexOf('Unsupported content type') !== -1){
                             return ErrorHandler.InvalidValueBadRequest(res, ['file']);
                         }else if(e.code === 'ERR_FS_FILE_TOO_LARGE'){
@@ -66,15 +66,16 @@ class AssetController {
                 let file = await File.Get(file_id);
                 if(file.is_public){
                     //if file is public, serve it as it is
-                    let file_buf = await StorageHandler.fetchApproved(file.system_file_name);
-                    res.set('Content-Type', file.mime_type);
-                    res.set('Content-Disposition', 'attachment; filename='+file.name);
-                    res.status(200).send(file_buf);
+                    await AssetController.__serveFile(file, res);
                 }else{
-                    //if file is not public, authenticate the user before serving the file.
-                    return res.status(200).json({
-                        message: "Feature currently not available",
-                    });
+
+                    let user = await AssetController.__authenticateUser(req);
+                    //return unauthorised if the file
+                    if(user == null || (user.id !== file.created_by.id) ){
+                        return ErrorHandler.Unauthorised(res);
+                    }
+
+                    return await AssetController.__serveFile(file, res);
                 }
             }catch(e){
                 if( ( e.message.indexOf('Invalid' ) === 0) || ( e.message.indexOf('Mandatory' ) === 0 ) ){
@@ -88,10 +89,42 @@ class AssetController {
             }
         })();
     }
-
     delete(req, res){
         return res.status(200).json({
             message: "delete asset",
+        });
+    }
+    static __serveFile(file, res){
+        return new Promise(async (resolve, reject) => {
+            try{
+                let file_buf = await StorageHandler.FetchApproved(file.system_file_name);
+                res.set('Content-Type', file.mime_type);
+                res.set('Content-Disposition', 'attachment; filename='+file.name);
+                res.status(200).send(file_buf);
+                resolve();
+            }catch (e) {
+                reject(e);
+            }
+        });
+    }
+    static __authenticateUser(req){
+        return new Promise(async (resolve, reject) => {
+            try {
+                //if file is not public, authenticate the user before serving the file.
+                let token = req.cookies.token;
+                if (!token) {
+                    token = req.header('Authorization');
+                }
+                // if the token is not set, return an unauthorized error
+                if (!token) {
+                    return resolve(null);
+                }
+                let payload  = await JWTAuth.Verify(token);
+                //verify teh user with the input jwt token.
+                resolve(await User.ValidateUser(payload.user_name, payload.password))
+            }catch (e) {
+                reject(e)
+            }
         });
     }
 }

@@ -1,7 +1,6 @@
 const mime = require('mime-types');
 const fs = require('fs');
 const path = require('path'), os = require('os');
-const { COPYFILE_EXCL } = fs.constants;
 const config = require('../config');
 
 class FileHandler{
@@ -29,14 +28,14 @@ class FileHandler{
             }
         })
     }
-    saveTmpAs(reader, system_file_name){
+    SaveTmpAs(reader, system_file_name){
         return this.__saveFile(reader, this.__getAbsTempFileDirPath(system_file_name))
     }
-    copyFromTmpToApproved(tmp_name, approved_name){
+    MoveFromTmpToApproved(tmp_name, approved_name){
         let self = this;
         return new Promise((resolve, reject)=>{
             try{
-                fs.copyFile(self.__getAbsTempFileDirPath(tmp_name), self.__getAbsApprovedFileDirPath(approved_name), COPYFILE_EXCL, () =>{
+                fs.rename(self.__getAbsTempFileDirPath(tmp_name), self.__getAbsApprovedFileDirPath(approved_name), () =>{
                     resolve(true);
                 });
             }catch(e) {
@@ -44,7 +43,7 @@ class FileHandler{
             }
         })
     }
-    deleteTmp(tmp_file, throw_error=true){          //files will be deleted from the tmp dir anyway while cleanup
+    DeleteTmp(tmp_file, throw_error=true){          //files will be deleted from the tmp dir anyway while cleanup
         let self = this;
         return new Promise(async (resolve, reject)=>{
             try{
@@ -59,7 +58,7 @@ class FileHandler{
             }
         })
     }
-    deleteApproved(approved_file, throw_error=true){          //files will be deleted from the tmp dir anyway while cleanup
+    DeleteApproved(approved_file, throw_error=true){          //files will be deleted from the tmp dir anyway while cleanup
         let self = this;
         return new Promise(async (resolve, reject)=>{
             try{
@@ -74,7 +73,7 @@ class FileHandler{
             }
         })
     }
-    fetchApproved(approved_file, encoding='utf-8',flag='r'){
+    FetchApproved(approved_file, encoding='utf-8',flag='r'){
         let self = this;
         return new Promise((resolve, reject)=>{
             try{
@@ -128,10 +127,10 @@ class FileHandler{
     __getAbsApprovedFileDirPath(system_file_name){
         return path.join(os.homedir(),  config.storage.location.base_dir, config.storage.location.approved_dir, path.basename(system_file_name));            //TODO push the base path to config
     }
-    getExtension(file_name){
+    GetExtension(file_name){
         return path.extname(file_name);
     }
-    fetchExtensionFor(mime_type){
+    FetchExtensionFor(mime_type){
         let ext = mime.extension(mime_type);
         if(!ext){
             //log error when unable to find proper extensions,

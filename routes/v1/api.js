@@ -4,8 +4,12 @@ const auth = require("./auth");
 //registering all v1 router to v1 router.
 const v1_api_router = Router();
 
+let white_list_url_regexes = [];
+//whitelist assets url, authentication can be done in the controller if needed.
+white_list_url_regexes.push('/files/[0-9a-z]+/assets');
+
 //adding v1 auth mechanism - Bearer Auth with jwt
-v1_api_router.use(auth);
+v1_api_router.use(auth(white_list_url_regexes));
 
 //registering user routes
 // v1_api_router.post('/users', UserController.create);
@@ -18,14 +22,14 @@ v1_api_router.get('/users/:id', UserController.get);
 v1_api_router.post('/files', FileController.create);
 v1_api_router.get('/files/:id', FileController.get);
 v1_api_router.get('/files/:id/assets', AssetController.get);
-//TODO
+// TODO
 // v1_api_router.get('/files', FileController.getAll);
 // v1_api_router.put('/files/:id', FileController.update);
 // v1_api_router.delete('/files/:id', FileController.delete);
 
 //registering asset routes
 v1_api_router.post('/assets', AssetController.create);
-//TODO
+// TODO
 // v1_api_router.get('/assets/:id', AssetController.get);
 
 module.exports = (app)=>{

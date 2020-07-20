@@ -3,6 +3,9 @@ const {DbHandler, Utils} = require("../helpers");
 class AssetRepo{
     constructor(){
         this.collection_name = "assets";
+        this.fields = {
+            created : 'created'
+        }
     }
 
     Create(actual_name=null, system_file_name=null, encoding=null, mime_type=null, size=null, user=null){
@@ -59,6 +62,22 @@ class AssetRepo{
             }
             return DbHandler.Find(self.collection_name, {'_id' : DbHandler.ObjectIDOf(id)}).then((assets)=>{
                 resolve(assets[0]);
+            }, (err)=>{
+                console.error("Error while getting asset, ", err);
+                reject(err)
+            }).catch((err)=>{
+                console.error("Error while getting asset, ", err);
+                reject(err)
+            })
+        });
+    }
+    GetAssetsBefore(time){
+        let self = this;
+        let search_by = {};
+        search_by[self.fields.created] = {'$lt':time};
+        return new Promise((resolve, reject)=>{
+            return DbHandler.Find(self.collection_name, search_by).then((assets)=>{
+                resolve(assets);
             }, (err)=>{
                 console.error("Error while getting asset, ", err);
                 reject(err)

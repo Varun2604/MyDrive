@@ -3,4 +3,5 @@ module.exports = {
     DbHandler : require("./mongo_db"),
     Utils : require("./util"),
     StorageHandler : require("./file_storage"),
+    JWTAuth : require('./jwt')
 };
