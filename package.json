@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node server.js",
-    "test": "node test.js"
+    "test": "node test.js",
+    "daemons" : "./node_modules/.bin/forever start --sourceDir ./daemons"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
@@ -14,7 +15,8 @@
     "jsonwebtoken": "^8.5.1",
     "mime-types": "^2.1.27",
     "mongodb": "^3.5.9",
-    "uuid": "^8.2.0"
+    "uuid": "^8.2.0",
+    "forever": "^3.0.0"
   },
   "devDependencies": {
     "mocha": "^8.0.1"

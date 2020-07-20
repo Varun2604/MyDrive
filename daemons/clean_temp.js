@@ -13,16 +13,7 @@ function cleanTemp() {
         try{
             await DbHandler.Init();
             let old_assets = await Asset.GetAssetsBefore(then);
-            old_assets = [{
-                _id: 'f127b2a5ab7320e345864b1',
-                system_file_name: '1ca25764-0202-429b-9b18-d2365cbaaa0e.png',
-                actual_name: 'Screenshot 2019-06-06 at 12.58.21 PM.png',
-                encoding: 'utf8',
-                mime_type: 'image/png',
-                size: 258956,
-                created: 1595046698544
-            }
-            ];
+
             //3. clear all assets
             if (old_assets && old_assets.length > 0) {
                 for(let asset of old_assets){
@@ -35,8 +26,9 @@ function cleanTemp() {
             console.log(`clean temporary directory job failed with error at ${new Date()}`);
             console.error("clean temporary directory job failed with error", e);
         }
+        process.exit(0);
     })();
 }
 module.exports = cleanTemp;
 
-// cleanTemp();
+cleanTemp();

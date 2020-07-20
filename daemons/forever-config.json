@@ -1,0 +1,10 @@
+{
+  "uid": "daemons",
+  "append": true,
+  "watch": true,
+  "script": "clean_temp.js",
+  "sourceDir": "./",
+  "logFile": "./forever.log",
+  "outFile": "./out.log",
+  "errFile": "./error.log"
+}
